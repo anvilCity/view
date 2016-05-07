@@ -68,11 +68,11 @@
         setInterval(function() {
             dummyData.forEach(function (elem) {
                 console.log(elem);
-                elem.score = Math.random();
-                elem.value = Math.random()*1000;
+                elem.score = Math.abs(elem.score + (Math.random() - 0.5) / 10);
+                elem.value = Math.abs(elem.value + (Math.random() - 0.5) * 10);
             });
             channel.trigger('client-new_data', dummyData);
-        }, 2000);
+        }, 200);
       });
       
     </script>

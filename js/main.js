@@ -26,7 +26,7 @@
 
     var bubblePack = d3.layout.pack()
         .sort(null); //disable sort to keep nodes in DOM traversal order
-    var svg = d3.select("svg")
+    var svg = d3.select("svg#chart");
         
     function setChartSize() {
         bubblePack = bubblePack.size([window.innerWidth, window.innerHeight])
