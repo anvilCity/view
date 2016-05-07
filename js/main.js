@@ -1,6 +1,29 @@
 "use strict";
 (function() {
 
+    Pusher.log = function(message) {
+        if (window.console && window.console.log) {
+            window.console.log(message);
+        }
+    };
+
+    var APP_KEY = "479c59972bf192be9acf";
+    var APP_SECRET = "19889e3337268d47f4a5";
+
+    var pusher = new Pusher(APP_KEY, {
+        authTransport: 'client',
+        clientAuth: {
+            key: APP_KEY,
+            secret: APP_SECRET,
+            cluster: 'eu',
+            encrypted: true,
+            user_id: '0',
+            user_info: {}
+        }
+    });
+
+    var channel = pusher.subscribe('presence-pool');
+
     var bubblePack = d3.layout.pack()
         .sort(null); //disable sort to keep nodes in DOM traversal order
     var svg = d3.select("svg")
@@ -59,43 +82,8 @@
     window.onresize = setChartSize;
     setChartSize();
     
-    setInterval(function() {
+    channel.bind('client-new_data', function(data){
+        update(data);
+    });
     
-        var dummyData = [
-            {
-                entity: "Apple",
-                value: 317,
-                score: 0.8
-            },
-            {
-                entity: "Twitter",
-                value: 56,
-                score: 0.5
-            },
-            {
-            entity: "Microsoft",
-            value: 172,
-            score: 0.1
-            },
-            {
-                entity: "Oracle",
-                value: 3,
-                score: 0.9
-            },
-            {
-                entity: "Google",
-                value: 817,
-                score: 0.3
-            }
-        ];
-    
-        return function () {
-            dummyData.forEach(function (elem) {
-                console.log(elem);
-                elem.score = Math.random();
-                elem.value = Math.random()*1000;
-            });
-            update(dummyData);
-        }()
-    }, 2000);
 }());
