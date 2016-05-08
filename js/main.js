@@ -22,6 +22,9 @@
         }
     });
 
+    var colourInterpolator = d3.interpolateRgb("red", "green");
+    var expanded = false;
+
     var channel = pusher.subscribe('presence-pool');
 
     var bubblePack = d3.layout.pack()
@@ -35,8 +38,6 @@
     }
     
     function update(newData) {
-    
-        var colourInterpolator = d3.interpolateRgb("red", "green");
     
         var nodes = svg.selectAll(".node")
             .data(bubblePack.nodes({
@@ -59,7 +60,53 @@
         nodes.transition()
             .attr("transform", function (d) {
                 return "translate(" + d.x + "," + d.y + ")";
+            })
+            
+        nodes.on('mouseenter', function (d) {
+                expanded = true;
+                d3.select(this)
+                //make sure we have circle and not g
+                .select("circle")
+                .transition()
+                .duration(1000)
+                .attr("r", function (d) {
+                    d.oldR = d.r;
+                    return 300;
+                })
+                .attr("fill", function (d) {
+                    return "url(#image)";
+                })
+                .style("fill", null);
+                
+                d3.select(this)
+                    .select("text")
+                    .style("visibility", "hidden");
+            //this.parentNode.appendChild(this);
+        });
+        
+        nodes.on('mouseover', function (d) {
+            this.parentNode.appendChild(this);
+        });
+                    
+        nodes.on('mouseleave', function (d) {
+            expanded = false;
+            console.log(d3.event);
+            var circle = d3.select(this)
+                .select("circle")
+                
+            circle.transition()
+                .duration(1000)
+                .attr("r", function (d) {
+                    return d.oldR;
+                })
+                .style("fill", function (d) {
+                return colourInterpolator(d.avgSentiment);
             });
+            
+            d3.select(this)
+                .select("text")
+                .style("visibility", null);
+        });
         
         //update to latest values     
         nodes.select("circle")
@@ -68,13 +115,13 @@
                 return d.r;
             })
             .style("fill", function(d) {
-                return colourInterpolator(d.score);
+                return colourInterpolator(d.avgSentiment);
             });
             
         nodes.select("text")
             .transition()
             .text(function (d) {
-                return d.entity;
+                return d.key;
             });
 
     }
@@ -83,7 +130,9 @@
     setChartSize();
     
     channel.bind('client-new_data', function(data){
-        update(data);
+        if (!expanded) {
+            update(data);
+        }
     });
     
 }());

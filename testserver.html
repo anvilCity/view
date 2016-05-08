@@ -35,44 +35,44 @@
       channel.bind('pusher:subscription_succeeded', function(){
         var dummyData = [
             {
-                entity: "Apple",
+                key: "Apple",
                 value: 317,
-                score: 0.8
+                avgSentiment: 0.8
             },
             {
-                entity: "Twitter",
+                key: "Twitter",
                 value: 56,
-                score: 0.5
+                avgSentiment: 0.5
             },
             {
-            entity: "Microsoft",
-            value: 172,
-            score: 0.1
+                key: "Microsoft",
+                value: 172,
+                avgSentiment: 0.1
             },
             {
-                entity: "Oracle",
+                key: "Oracle",
                 value: 3,
-                score: 0.9
+                avgSentiement: 0.9
             },
             {
-                entity: "Google",
+                key: "Google",
                 value: 817,
-                score: 0.3
+                avgSentiment: 0.3
             },
             {
-                entity: "MLH",
+                key: "MLH",
                 value: 43,
-                score: 0.95
+                avgSentiment: 0.95
             }
         ];
         setInterval(function() {
             dummyData.forEach(function (elem) {
                 console.log(elem);
-                elem.score = Math.abs(elem.score + (Math.random() - 0.5) / 10);
+                elem.avgSentiment = Math.abs(elem.avgSentiment + (Math.random() - 0.5) / 10);
                 elem.value = Math.abs(elem.value + (Math.random() - 0.5) * 10);
             });
             channel.trigger('client-new_data', dummyData);
-        }, 200);
+        }, 10000);
       });
       
     </script>
