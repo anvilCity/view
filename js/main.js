@@ -133,7 +133,7 @@
                     return d.oldR;
                 })
                 .style("fill", function (d) {
-                return colourInterpolator(d.avgSentiment);
+                return colourInterpolator((d.avgSentiment * 4) - 1.6);
             });
             
             d3.select(this)
