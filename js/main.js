@@ -26,7 +26,9 @@
     var expanded = false;
 
     var channel = pusher.subscribe('presence-pool');
-
+    //Do not confuse with #image
+    var imageTag = d3.select("image");
+    
     var bubblePack = d3.layout.pack()
         .sort(null); //disable sort to keep nodes in DOM traversal order
     var svg = d3.select("svg#chart");
@@ -35,6 +37,35 @@
         bubblePack = bubblePack.size([window.innerWidth, window.innerHeight])
         svg.attr("height", window.innerHeight)
             .attr("width", window.innerWidth);
+    }
+    
+    function setImage(key, sentiment) {
+        function sentimentToEmotion(sentiment) {
+            var goodWords = ["good", "admirable", "commendable", "exceptional", "favourable", "nice", "satisfying"];
+            var badWords = ["bad", "amiss", "awful", "crummy", "garbage", "gross", "terrible"];
+            var emotion,
+                i;
+
+            if (sentiment < 0.5) {
+                i = Math.floor(Math.random() * badWords.length);
+                emotion = badWords[i];
+            } else if (sentiment > 0.5) {
+                i = Math.floor(Math.random() * goodWords.length);
+                emotion = goodWords[i];
+            } else {
+                emotion = "";
+            }
+            
+            return emotion;
+        }
+        
+        var query = key + "+" + sentimentToEmotion(key);
+                
+        d3.json('http://api.giphy.com/v1/gifs/search?q=' + query + '&api_key=dc6zaTOxFJmzC',
+            function (data) {
+                imageTag.attr('xlink:href', data.data[Math.floor(Math.random() * data.data.length)].images.original.url)
+            }
+        );
     }
     
     function update(newData) {
@@ -63,6 +94,8 @@
             })
             
         nodes.on('mouseenter', function (d) {
+                setImage(d.key, d.avgSentiment);
+                
                 expanded = true;
                 d3.select(this)
                 //make sure we have circle and not g
@@ -106,6 +139,8 @@
             d3.select(this)
                 .select("text")
                 .style("visibility", null);
+                
+            imageTag.attr("xlink:href", null);
         });
         
         //update to latest values     
