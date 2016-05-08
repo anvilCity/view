@@ -72,6 +72,11 @@
     }
     
     function update(newData) {
+        
+        newData.forEach(function (e, index) {
+            if (e.key === "id" || e.key === "https")
+                newData.splice(index, 1);
+        });
     
         var nodes = svg.selectAll(".node")
             .data(bubblePack.nodes({
