@@ -25,7 +25,7 @@
     var colourInterpolator = d3.interpolateRgb("red", "green");
     var expanded = false;
 
-    var channel = pusher.subscribe('presence-pool');
+    var channel = pusher.subscribe('entities');
     //Do not confuse with #image
     var imageTag = d3.select("image");
     
@@ -39,7 +39,7 @@
             .attr("width", window.innerWidth);
     }
     
-    function setImage(key, sentiment) {
+    function setImage(key, sentiment, circle) {
         function sentimentToEmotion(sentiment) {
             var goodWords = ["good", "admirable", "commendable", "exceptional", "favourable", "nice", "satisfying"];
             var badWords = ["bad", "amiss", "awful", "crummy", "garbage", "gross", "terrible"];
@@ -59,11 +59,14 @@
             return emotion;
         }
         
-        var query = key + "+" + sentimentToEmotion(key);
+        var query = key;// + "+" + sentimentToEmotion(sentiment);
                 
         d3.json('http://api.giphy.com/v1/gifs/search?q=' + query + '&api_key=dc6zaTOxFJmzC',
             function (data) {
-                imageTag.attr('xlink:href', data.data[Math.floor(Math.random() * data.data.length)].images.original.url)
+                if (data.data.length != 0) {
+                    imageTag.attr('xlink:href', data.data[Math.floor(Math.random() * data.data.length)].images.original.url);
+                    circle.style('fill', null);
+                }
             }
         );
     }
@@ -83,7 +86,8 @@
             .append("g")
             .attr("class", "node");
             
-        newGroups.append("circle");
+        newGroups.append("circle")
+            .attr("fill", "url(#image)");
         newGroups.append("text")
             .attr("dy", ".3em")
             .style("text-anchor", "middle");
@@ -94,26 +98,22 @@
             })
             
         nodes.on('mouseenter', function (d) {
-                setImage(d.key, d.avgSentiment);
-                
                 expanded = true;
-                d3.select(this)
+                var circle = d3.select(this)
                 //make sure we have circle and not g
-                .select("circle")
-                .transition()
+                .select("circle");
+                
+                circle.transition()
                 .duration(1000)
                 .attr("r", function (d) {
                     d.oldR = d.r;
                     return 300;
-                })
-                .attr("fill", function (d) {
-                    return "url(#image)";
-                })
-                .style("fill", null);
+                });
                 
                 d3.select(this)
                     .select("text")
                     .style("visibility", "hidden");
+                setImage(d.key, d.avgSentiment, circle);
             //this.parentNode.appendChild(this);
         });
         
@@ -164,7 +164,7 @@
     window.onresize = setChartSize;
     setChartSize();
     
-    channel.bind('client-new_data', function(data){
+    channel.bind('update', function(data){
         if (!expanded) {
             update(data);
         }
