@@ -150,7 +150,7 @@
                 return d.r;
             })
             .style("fill", function(d) {
-                return colourInterpolator(d.avgSentiment);
+                return colourInterpolator((d.avgSentiment * 4) - 1.6);
             });
             
         nodes.select("text")
